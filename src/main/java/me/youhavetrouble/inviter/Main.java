@@ -98,4 +98,8 @@ public class Main {
         LOGGER.info("Welcome to the Inviter Application!");
     }
 
+    public static Storage getStorage() {
+        return storage;
+    }
+
 }
