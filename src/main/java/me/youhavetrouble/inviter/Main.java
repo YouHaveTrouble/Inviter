@@ -1,7 +1,8 @@
 package me.youhavetrouble.inviter;
 
 import me.youhavetrouble.inviter.http.ApiServer;
-import me.youhavetrouble.inviter.storage.MemoryStorage;
+import me.youhavetrouble.inviter.discord.DiscordInviteManager;
+import me.youhavetrouble.inviter.storage.SqliteStorage;
 import me.youhavetrouble.inviter.storage.Storage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -18,8 +19,9 @@ public class Main {
     public static final Logger LOGGER = LoggerFactory.getLogger("Inviter");
 
     private static JDA jda;
-    private static Storage storage;
+    private static DiscordInviteManager discordInviteManager;
     private static ApiServer apiServer;
+    private static Storage storage;
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -69,6 +71,8 @@ public class Main {
             }
         }
 
+        storage = new SqliteStorage();
+
         jda = JDABuilder.create(
                         token,
                         Set.of(GatewayIntent.GUILD_INVITES)
@@ -86,7 +90,10 @@ public class Main {
 
         jda.awaitReady();
 
-        storage = new MemoryStorage(jda);
+        jda.getGuilds().parallelStream().forEach(guild -> storage.saveDefaultGuildSettings(guild.getIdLong()));
+        // TODO make sure to save default settings for guilds bot joins on runtime
+
+        discordInviteManager = new DiscordInviteManager(jda);
 
         try {
             apiServer = new ApiServer(hostname, port);
@@ -98,8 +105,8 @@ public class Main {
         LOGGER.info("Welcome to the Inviter Application!");
     }
 
-    public static Storage getStorage() {
-        return storage;
+    public static DiscordInviteManager getDiscordInviteMenager() {
+        return discordInviteManager;
     }
 
 }

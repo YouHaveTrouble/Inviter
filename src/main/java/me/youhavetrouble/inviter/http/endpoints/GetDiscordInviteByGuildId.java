@@ -1,9 +1,9 @@
 package me.youhavetrouble.inviter.http.endpoints;
 
 import com.sun.net.httpserver.HttpExchange;
-import me.youhavetrouble.inviter.DiscordInvite;
+import me.youhavetrouble.inviter.discord.DiscordInvite;
 import me.youhavetrouble.inviter.Main;
-import me.youhavetrouble.inviter.storage.Storage;
+import me.youhavetrouble.inviter.discord.DiscordInviteManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
             return;
         }
 
-        Storage storage = Main.getStorage();
+        DiscordInviteManager storage = Main.getDiscordInviteMenager();
         DiscordInvite invite = storage.getInvite(guildIdLong);
 
         if (invite == null) {

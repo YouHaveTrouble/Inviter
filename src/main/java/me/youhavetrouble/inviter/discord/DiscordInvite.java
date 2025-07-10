@@ -1,4 +1,4 @@
-package me.youhavetrouble.inviter;
+package me.youhavetrouble.inviter.discord;
 
 public record DiscordInvite(
         String code,
