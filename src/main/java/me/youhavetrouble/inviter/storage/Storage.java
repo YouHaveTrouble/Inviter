@@ -9,6 +9,8 @@ public interface Storage {
 
     @NotNull GuildSettings getGuildSettings(long guildId);
 
+    @Nullable GuildSettings getGuildSettings(@NotNull String hostname);
+
     void saveDefaultGuildSettings(long guildId);
 
     void updateDiscordApiEnabled(long guildId, boolean enabled);

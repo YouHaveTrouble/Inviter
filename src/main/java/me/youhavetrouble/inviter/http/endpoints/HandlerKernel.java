@@ -13,6 +13,7 @@ public class HandlerKernel implements HttpHandler {
     private final Set<EndpointHandler> handlers = new HashSet<>();
 
     public HandlerKernel() {
+        handlers.add(new MainEndpoint());
         handlers.add(new GetDiscordInviteByGuildId());
     }
 
@@ -20,7 +21,7 @@ public class HandlerKernel implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
 
         String path = exchange.getRequestURI().getPath();
-        if (path.endsWith("/")) path = path.substring(0, path.length() - 1);
+        if (path.endsWith("/") && path.length() > 1) path = path.substring(0, path.length() - 1);
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         exchange.getResponseHeaders().set("Access-Control-Allow-Methods", "*");
         exchange.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type");

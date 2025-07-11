@@ -109,4 +109,8 @@ public class Main {
         return discordInviteManager;
     }
 
+    public static Storage getStorage() {
+        return storage;
+    }
+
 }

@@ -64,12 +64,34 @@ public class SqliteStorage implements Storage {
             if (resultSet.next()) {
                 boolean apiEnabled = resultSet.getBoolean("api_enabled");
                 String apiHostname = resultSet.getString("api_hostname");
-                return new GuildSettings(apiEnabled, apiHostname);
+                return new GuildSettings(guildId, apiEnabled, apiHostname);
             }
-            return new GuildSettings(false, null);
+            return new GuildSettings(guildId,false, null);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to retrieve guild settings", e);
 
+        }
+    }
+
+    @Nullable
+    @Override
+    public GuildSettings getGuildSettings(@NotNull String hostname) {
+
+        try (Connection connection = dataSource.getConnection()) {
+            var statement = connection.prepareStatement(
+                "SELECT * FROM guild_settings WHERE api_hostname = ?"
+            );
+            statement.setString(1, hostname);
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                long guildId = resultSet.getLong("guild_id");
+                boolean apiEnabled = resultSet.getBoolean("api_enabled");
+                return new GuildSettings(guildId, apiEnabled, hostname);
+            }
+            return null; // No settings found for the given hostname
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to retrieve guild settings by hostname", e);
         }
     }
 

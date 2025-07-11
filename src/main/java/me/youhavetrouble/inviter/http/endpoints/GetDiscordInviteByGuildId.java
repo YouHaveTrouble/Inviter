@@ -38,8 +38,8 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
             return;
         }
 
-        DiscordInviteManager storage = Main.getDiscordInviteMenager();
-        DiscordInvite invite = storage.getInvite(guildIdLong);
+        DiscordInviteManager inviteManager = Main.getDiscordInviteMenager();
+        DiscordInvite invite = inviteManager.getInvite(guildIdLong);
 
         if (invite == null) {
             exchange.sendResponseHeaders(404, -1); // Not Found
