@@ -13,6 +13,8 @@ public interface Storage {
 
     void saveDefaultGuildSettings(long guildId);
 
+    void removeGuildSettings(long guildId);
+
     void updateDiscordApiEnabled(long guildId, boolean enabled);
 
     void updateDiscordApiHostname(long guildId, @Nullable String hostname);

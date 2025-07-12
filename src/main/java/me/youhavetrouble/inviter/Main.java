@@ -1,5 +1,6 @@
 package me.youhavetrouble.inviter;
 
+import me.youhavetrouble.inviter.discord.listener.GuildJoinAndLeaveListener;
 import me.youhavetrouble.inviter.http.ApiServer;
 import me.youhavetrouble.inviter.discord.DiscordInviteManager;
 import me.youhavetrouble.inviter.storage.SqliteStorage;
@@ -7,12 +8,12 @@ import me.youhavetrouble.inviter.storage.Storage;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 public class Main {
 
@@ -73,25 +74,14 @@ public class Main {
 
         storage = new SqliteStorage();
 
-        jda = JDABuilder.create(
-                        token,
-                        Set.of(GatewayIntent.GUILD_INVITES)
-                )
-                .disableCache(
-                        CacheFlag.ACTIVITY,
-                        CacheFlag.VOICE_STATE,
-                        CacheFlag.EMOJI,
-                        CacheFlag.STICKER,
-                        CacheFlag.CLIENT_STATUS,
-                        CacheFlag.ONLINE_STATUS,
-                        CacheFlag.SCHEDULED_EVENTS
-                )
+        jda = JDABuilder.createLight(token, Set.of(GatewayIntent.GUILD_INVITES))
+                .setCallbackPool(Executors.newVirtualThreadPerTaskExecutor())
+                .addEventListeners(new GuildJoinAndLeaveListener())
                 .build();
 
         jda.awaitReady();
 
         jda.getGuilds().parallelStream().forEach(guild -> storage.saveDefaultGuildSettings(guild.getIdLong()));
-        // TODO make sure to save default settings for guilds bot joins on runtime
 
         discordInviteManager = new DiscordInviteManager(jda);
 
@@ -103,6 +93,10 @@ public class Main {
         }
 
         LOGGER.info("Welcome to the Inviter Application!");
+    }
+
+    public static JDA getJda() {
+        return jda;
     }
 
     public static DiscordInviteManager getDiscordInviteMenager() {

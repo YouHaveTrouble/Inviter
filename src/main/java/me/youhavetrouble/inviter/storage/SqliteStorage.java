@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.sql.DataSource;
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -78,7 +79,7 @@ public class SqliteStorage implements Storage {
     public GuildSettings getGuildSettings(@NotNull String hostname) {
 
         try (Connection connection = dataSource.getConnection()) {
-            var statement = connection.prepareStatement(
+            PreparedStatement statement = connection.prepareStatement(
                 "SELECT * FROM guild_settings WHERE api_hostname = ?"
             );
             statement.setString(1, hostname);
@@ -98,7 +99,7 @@ public class SqliteStorage implements Storage {
     @Override
     public void saveDefaultGuildSettings(long guildId) {
         try (Connection connection = dataSource.getConnection()) {
-            var statement = connection.prepareStatement(
+            PreparedStatement statement = connection.prepareStatement(
                 "INSERT OR IGNORE INTO guild_settings (guild_id) VALUES (?)"
             );
             statement.setLong(1, guildId);
@@ -109,9 +110,22 @@ public class SqliteStorage implements Storage {
     }
 
     @Override
+    public void removeGuildSettings(long guildId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM guild_settings WHERE guild_id = ?"
+            );
+            statement.setLong(1, guildId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove guild settings", e);
+        }
+    }
+
+    @Override
     public void updateDiscordApiEnabled(long guildId, boolean enabled) {
         try (Connection connection = dataSource.getConnection()) {
-            var statement = connection.prepareStatement(
+            PreparedStatement statement = connection.prepareStatement(
                 "UPDATE guild_settings SET api_enabled = ? WHERE guild_id = ?"
             );
             statement.setBoolean(1, enabled);
@@ -126,7 +140,7 @@ public class SqliteStorage implements Storage {
     @Override
     public void updateDiscordApiHostname(long guildId, @Nullable String hostname) {
         try (Connection connection = dataSource.getConnection()) {
-            var statement = connection.prepareStatement(
+            PreparedStatement statement = connection.prepareStatement(
                 "UPDATE guild_settings SET api_hostname = ? WHERE guild_id = ?"
             );
             if (hostname == null || hostname.isEmpty()) {
