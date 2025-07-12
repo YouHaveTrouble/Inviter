@@ -1,6 +1,9 @@
 package me.youhavetrouble.inviter;
 
+import me.youhavetrouble.inviter.discord.command.ApiStatusChangeCommand;
+import me.youhavetrouble.inviter.discord.command.Command;
 import me.youhavetrouble.inviter.discord.listener.GuildJoinAndLeaveListener;
+import me.youhavetrouble.inviter.discord.listener.SlashCommandInteractionListener;
 import me.youhavetrouble.inviter.http.ApiServer;
 import me.youhavetrouble.inviter.discord.DiscordInviteManager;
 import me.youhavetrouble.inviter.storage.SqliteStorage;
@@ -76,10 +79,15 @@ public class Main {
 
         jda = JDABuilder.createLight(token, Set.of(GatewayIntent.GUILD_INVITES))
                 .setCallbackPool(Executors.newVirtualThreadPerTaskExecutor())
-                .addEventListeners(new GuildJoinAndLeaveListener())
+                .addEventListeners(
+                        new GuildJoinAndLeaveListener(),
+                        new SlashCommandInteractionListener()
+                )
                 .build();
 
         jda.awaitReady();
+
+        Command.registerCommand(new ApiStatusChangeCommand());
 
         jda.getGuilds().parallelStream().forEach(guild -> storage.saveDefaultGuildSettings(guild.getIdLong()));
 
@@ -92,7 +100,7 @@ public class Main {
             System.exit(1);
         }
 
-        LOGGER.info("Welcome to the Inviter Application!");
+        LOGGER.info("Inviter is up and running!");
     }
 
     public static JDA getJda() {
