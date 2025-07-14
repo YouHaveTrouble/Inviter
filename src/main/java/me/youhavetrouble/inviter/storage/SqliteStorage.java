@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class SqliteStorage implements Storage {
 
@@ -35,16 +36,21 @@ public class SqliteStorage implements Storage {
         dataSource = new HikariDataSource(config);
 
         try (Connection connection = dataSource.getConnection()) {
-            // Initialize the database schema if necessary
-            // For example, you might want to create a table for guild settings
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS guild_settings (
                     guild_id LONG PRIMARY KEY,
-                    api_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-                    api_hostname VARCHAR(256) DEFAULT NULL
+                    api_enabled BOOLEAN NOT NULL DEFAULT FALSE
                 );
                 """
             );
+            connection.createStatement().execute("""
+                CREATE TABLE IF NOT EXISTS hostnames (
+                    hostname VARCHAR(256) PRIMARY KEY,
+                    guild_id LONG NOT NULL,
+                    failed_checks INTEGER NOT NULL DEFAULT 0,
+                    FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id) ON DELETE CASCADE
+                )
+                """);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
         }
@@ -64,7 +70,7 @@ public class SqliteStorage implements Storage {
 
             if (resultSet.next()) {
                 boolean apiEnabled = resultSet.getBoolean("api_enabled");
-                String apiHostname = resultSet.getString("api_hostname");
+                String apiHostname = resultSet.getString("hostname");
                 return new GuildSettings(guildId, apiEnabled, apiHostname);
             }
             return new GuildSettings(guildId,false, null);
@@ -80,7 +86,7 @@ public class SqliteStorage implements Storage {
 
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM guild_settings WHERE api_hostname = ?"
+                "SELECT * FROM guild_settings WHERE hostname = ?"
             );
             statement.setString(1, hostname);
             ResultSet resultSet = statement.executeQuery();
@@ -138,20 +144,62 @@ public class SqliteStorage implements Storage {
     }
 
     @Override
-    public void updateDiscordApiHostname(long guildId, @Nullable String hostname) {
+    public void addHostname(long guildId, @Nullable String hostname) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(
-                "UPDATE guild_settings SET api_hostname = ? WHERE guild_id = ?"
+                "INSERT OR IGNORE INTO hostnames (hostname, guild_id) VALUES (?, ?)"
             );
-            if (hostname == null || hostname.isEmpty()) {
-                statement.setNull(1, java.sql.Types.VARCHAR);
-            } else {
-                statement.setString(1, hostname);
-            }
+            statement.setString(1, hostname);
             statement.setLong(2, guildId);
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Failed to update Discord API hostname", e);
+            throw new RuntimeException("Failed to add hostname", e);
         }
     }
+
+    @Override
+    public void removeHostname(@NotNull String hostname) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM hostnames WHERE hostname = ?"
+            );
+            statement.setString(1, hostname);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove hostname", e);
+        }
+
+    }
+
+    @Override
+    public List<String> listHostnames(long guildId) {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                "SELECT hostname FROM hostnames WHERE guild_id = ?"
+            );
+            statement.setLong(1, guildId);
+            ResultSet resultSet = statement.executeQuery();
+
+            List<String> hostnames = new java.util.ArrayList<>();
+            while (resultSet.next()) {
+                hostnames.add(resultSet.getString("hostname"));
+            }
+            return hostnames;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to list hostnames", e);
+        }
+    }
+
+    @Override
+    public void cleanUpHostnames() {
+        try (Connection connection = dataSource.getConnection()) {
+            PreparedStatement statement = connection.prepareStatement(
+                "DELETE FROM hostnames WHERE failed_checks >= 3"
+            );
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to clean up hostnames", e);
+        }
+    }
+
 }
