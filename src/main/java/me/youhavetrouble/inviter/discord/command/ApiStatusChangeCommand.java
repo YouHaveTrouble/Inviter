@@ -48,7 +48,7 @@ public class ApiStatusChangeCommand extends Command {
         if (statusMapping == null) {
             GuildSettings setings = Main.getStorage().getGuildSettings(guild.getIdLong());
 
-            String message = setings.apiEnabled() ?
+            String message = setings.invitesEnabled() ?
                 "Inviter is currently __**enabled**__ for this server." :
                 "Inviter is currently __**disabled**__ for this server.";
 
