@@ -14,6 +14,9 @@ public class HandlerKernel implements HttpHandler {
 
     public HandlerKernel() {
         handlers.add(new GetDiscordInviteByGuildId());
+
+        // Static endpoints
+        handlers.add(new MainEndpoint());
     }
 
     @Override

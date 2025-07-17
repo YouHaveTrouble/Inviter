@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="title" content="Discord Inviter">
+    <meta name="description" content="A simple tool to invite users to a Discord server"/>
+    <meta name="keywords" content="Discord, Inviter, Tool, Invite Users"/>
+    <meta name="author" content="YouHaveTrouble"/>
+    <meta name="og:type" content="website"/>
+    <meta name="og:title" content="Discord Inviter"/>
+    <meta name="og:description" content="A simple tool to invite users to a Discord server"/>
+    <meta name="og:url" content="https://inviter.yht.one"/>
+    <meta name="twitter:title" content="Discord Inviter"/>
+    <meta name="twitter:description" content="A simple tool to invite users to a Discord server"/>
+    <title>Discord Inviter</title>
+    <style>
+        :root {
+            --color-primary: #5865F2;
+            --color-primary-highlight: #4752C4;
+            --color-text: #f0f0f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, sans-serif;
+            font-weight: normal;
+            vertical-align: baseline;
+            overflow-wrap: break-word;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            line-height: 1.5;
+            background-color: #272727;
+            color: var(--color-text);
+        }
+
+        main {
+            min-height: 100vh;
+            padding: 1rem;
+            gap: 2rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        ol, ul {
+            text-align: left;
+            margin-left: 2rem;
+        }
+
+        .highlight {
+            display: inline-block;
+            padding: 0.1rem 0.2rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.2rem;
+            white-space: break-spaces;
+            overflow-wrap: anywhere;
+        }
+
+        a[href]:not([role="button"]) {
+            color: var(--color-primary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a[href]:not([role="button"]):hover {
+            color: var(--color-primary-highlight);
+        }
+
+        [role="button"] {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            margin-top: 1rem;
+            background-color: var(--color-primary);
+            color: var(--color-text);
+            text-decoration: none;
+            border-radius: 0.25rem;
+            transition: background-color 0.2s ease;
+        }
+
+        [role="button"]:hover {
+            background-color: var(--color-primary-highlight);
+        }
+    </style>
+</head>
+<body>
+<main>
+    <div>
+        <h1>Inviter</h1>
+        <p>Creates permanent invite links that make and recreate invite links if they expire or get removed.</p>
+        <a
+                role="button"
+                href="https://discord.com/oauth2/authorize?client_id={{discord_app_id}}"
+                target="_blank"
+                rel="noopener noreferrer"
+        >Install the bot</a>
+    </div>
+    <div>
+        <h2>Usage</h2>
+        <ol>
+            <li>Install the bot using the button above.</li>
+            <li>
+                <a
+                   href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                >
+                    Enable developer mode
+                </a> in your discord client and copy your guilds ID.
+            </li>
+            <li>Now you can use <span class="highlight">https://inviter.yht.one/invite/&lt;your_guild_id&gt;</span></li>
+        </ol>
+    </div>
+</main>
+</body>
+</html>
