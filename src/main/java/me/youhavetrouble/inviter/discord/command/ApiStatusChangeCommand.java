@@ -19,14 +19,14 @@ public class ApiStatusChangeCommand extends Command {
 
     @Nullable
     public String getName() {
-        return "api";
+        return "invites";
     }
 
     public void register(JDA jda, String name) {
-        jda.upsertCommand(Commands.slash("api", "Change if Inviter API should allow to retrieve this server's invites.")
+        jda.upsertCommand(Commands.slash("invites", "Change or see if Inviter should create invites for this guild.")
                 .setIntegrationTypes(IntegrationType.GUILD_INSTALL)
                 .addOptions(
-                        new OptionData(OptionType.BOOLEAN, "status", "Status of the api availability for this guild", false)
+                        new OptionData(OptionType.BOOLEAN, "status", "Enable or disable Inviter to work for this guild", false)
                 )
                 .setContexts(InteractionContextType.GUILD)
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_SERVER))
@@ -49,8 +49,8 @@ public class ApiStatusChangeCommand extends Command {
             GuildSettings setings = Main.getStorage().getGuildSettings(guild.getIdLong());
 
             String message = setings.apiEnabled() ?
-                "Inviter API is currently __**enabled**__ for this server." :
-                "Inviter API is currently __**disabled**__ for this server.";
+                "Inviter is currently __**enabled**__ for this server." :
+                "Inviter is currently __**disabled**__ for this server.";
 
             event.getHook().editOriginal(message).queue();
             return;
@@ -59,8 +59,8 @@ public class ApiStatusChangeCommand extends Command {
         boolean status = statusMapping.getAsBoolean();
         long guildId = guild.getIdLong();
 
-        Main.getStorage().updateDiscordApiEnabled(guildId, status);
-        String message = status ? "Inviter API is now __**enabled**__ for this server." : "Inviter API is now __**disabled**__ for this server.";
+        Main.getStorage().updateInvitesEnabled(guildId, status);
+        String message = status ? "Inviter is now __**enabled**__ for this server." : "Inviter API is now __**disabled**__ for this server.";
         event.getHook().editOriginal(message).queue();
     }
 

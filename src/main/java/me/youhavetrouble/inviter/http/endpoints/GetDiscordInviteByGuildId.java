@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class GetDiscordInviteByGuildId implements EndpointHandler {
 
-    private final Pattern pathPattern = Pattern.compile("^/api/v1/discord/\\d{10,18}$");
+    private final Pattern pathPattern = Pattern.compile("^/invite/\\d{10,18}$");
 
     @NotNull
     @Override

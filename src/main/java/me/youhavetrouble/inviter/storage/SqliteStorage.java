@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import me.youhavetrouble.inviter.discord.GuildSettings;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -12,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 public class SqliteStorage implements Storage {
 
@@ -39,18 +37,10 @@ public class SqliteStorage implements Storage {
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS guild_settings (
                     guild_id LONG PRIMARY KEY,
-                    api_enabled BOOLEAN NOT NULL DEFAULT FALSE
+                    invites_enabled BOOLEAN NOT NULL DEFAULT FALSE
                 );
                 """
             );
-            connection.createStatement().execute("""
-                CREATE TABLE IF NOT EXISTS hostnames (
-                    hostname VARCHAR(256) PRIMARY KEY,
-                    guild_id LONG NOT NULL,
-                    failed_checks INTEGER NOT NULL DEFAULT 0,
-                    FOREIGN KEY (guild_id) REFERENCES guild_settings(guild_id) ON DELETE CASCADE
-                )
-                """);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to initialize database", e);
         }
@@ -69,36 +59,13 @@ public class SqliteStorage implements Storage {
             ResultSet resultSet = statement.executeQuery();
 
             if (resultSet.next()) {
-                boolean apiEnabled = resultSet.getBoolean("api_enabled");
-                String apiHostname = resultSet.getString("hostname");
-                return new GuildSettings(guildId, apiEnabled, apiHostname);
+                boolean invitesEnabled = resultSet.getBoolean("invites_enabled");
+                return new GuildSettings(guildId, invitesEnabled);
             }
-            return new GuildSettings(guildId,false, null);
+            return new GuildSettings(guildId,false);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to retrieve guild settings", e);
 
-        }
-    }
-
-    @Nullable
-    @Override
-    public GuildSettings getGuildSettings(@NotNull String hostname) {
-
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                "SELECT * FROM guild_settings WHERE hostname = ?"
-            );
-            statement.setString(1, hostname);
-            ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                long guildId = resultSet.getLong("guild_id");
-                boolean apiEnabled = resultSet.getBoolean("api_enabled");
-                return new GuildSettings(guildId, apiEnabled, hostname);
-            }
-            return null; // No settings found for the given hostname
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to retrieve guild settings by hostname", e);
         }
     }
 
@@ -129,10 +96,10 @@ public class SqliteStorage implements Storage {
     }
 
     @Override
-    public void updateDiscordApiEnabled(long guildId, boolean enabled) {
+    public void updateInvitesEnabled(long guildId, boolean enabled) {
         try (Connection connection = dataSource.getConnection()) {
             PreparedStatement statement = connection.prepareStatement(
-                "UPDATE guild_settings SET api_enabled = ? WHERE guild_id = ?"
+                "UPDATE guild_settings SET invites_enabled = ? WHERE guild_id = ?"
             );
             statement.setBoolean(1, enabled);
             statement.setLong(2, guildId);
@@ -141,65 +108,6 @@ public class SqliteStorage implements Storage {
             throw new RuntimeException("Failed to update Discord API enabled status", e);
         }
 
-    }
-
-    @Override
-    public void addHostname(long guildId, @Nullable String hostname) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                "INSERT OR IGNORE INTO hostnames (hostname, guild_id) VALUES (?, ?)"
-            );
-            statement.setString(1, hostname);
-            statement.setLong(2, guildId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to add hostname", e);
-        }
-    }
-
-    @Override
-    public void removeHostname(@NotNull String hostname) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM hostnames WHERE hostname = ?"
-            );
-            statement.setString(1, hostname);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to remove hostname", e);
-        }
-
-    }
-
-    @Override
-    public List<String> listHostnames(long guildId) {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                "SELECT hostname FROM hostnames WHERE guild_id = ?"
-            );
-            statement.setLong(1, guildId);
-            ResultSet resultSet = statement.executeQuery();
-
-            List<String> hostnames = new java.util.ArrayList<>();
-            while (resultSet.next()) {
-                hostnames.add(resultSet.getString("hostname"));
-            }
-            return hostnames;
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to list hostnames", e);
-        }
-    }
-
-    @Override
-    public void cleanUpHostnames() {
-        try (Connection connection = dataSource.getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM hostnames WHERE failed_checks >= 3"
-            );
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to clean up hostnames", e);
-        }
     }
 
 }

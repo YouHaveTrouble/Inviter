@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 public class DiscordInviteManager {
 
     private final Cache<String, DiscordInvite> cache = Caffeine.newBuilder()
-            .expireAfterWrite(Duration.of(60, ChronoUnit.SECONDS))
+            .expireAfterWrite(Duration.of(55, ChronoUnit.SECONDS))
             .build();
 
     private final JDA jda;
@@ -26,7 +26,7 @@ public class DiscordInviteManager {
     @Nullable
     public DiscordInvite getInvite(long guildId) {
         DiscordInvite discordInvite = cache.getIfPresent(String.valueOf(guildId));
-        if (discordInvite == null || discordInvite.isExpired()) {
+        if (discordInvite == null) {
             Guild guild = jda.getGuildById(guildId);
             if (guild == null) {
                 return null; // Guild not found
@@ -46,6 +46,10 @@ public class DiscordInviteManager {
             );
         }
         return discordInvite;
+    }
+
+    public void removeFromCache(long guildId) {
+        cache.invalidate(String.valueOf(guildId));
     }
 
 }

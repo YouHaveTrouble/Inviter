@@ -19,9 +19,9 @@ public class GuildJoinAndLeaveListener extends ListenerAdapter {
 
     @Override
     public void onGuildLeave(@NotNull GuildLeaveEvent event) {
-        Storage storage = Main.getStorage();
         long guildId = event.getGuild().getIdLong();
-        storage.removeGuildSettings(guildId);
+        Main.getDiscordInviteMenager().removeFromCache(guildId);
+        Main.getStorage().removeGuildSettings(guildId);
     }
 
 }
