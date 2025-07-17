@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpExchange;
 import me.youhavetrouble.inviter.discord.DiscordInvite;
 import me.youhavetrouble.inviter.Main;
 import me.youhavetrouble.inviter.discord.DiscordInviteManager;
+import me.youhavetrouble.inviter.discord.GuildSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -39,10 +40,16 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
         }
 
         DiscordInviteManager inviteManager = Main.getDiscordInviteMenager();
+        GuildSettings settings = Main.getStorage().getGuildSettings(guildIdLong);
         DiscordInvite invite = inviteManager.getInvite(guildIdLong);
 
         if (invite == null) {
             exchange.sendResponseHeaders(404, -1); // Not Found
+            return;
+        }
+
+        if (!settings.invitesEnabled()) {
+            exchange.sendResponseHeaders(401, -1); // Not Found
             return;
         }
 
