@@ -13,7 +13,6 @@ public class HandlerKernel implements HttpHandler {
     private final Set<EndpointHandler> handlers = new HashSet<>();
 
     public HandlerKernel() {
-        handlers.add(new MainEndpoint());
         handlers.add(new GetDiscordInviteByGuildId());
     }
 
