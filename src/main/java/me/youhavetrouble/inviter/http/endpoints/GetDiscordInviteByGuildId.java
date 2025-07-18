@@ -8,11 +8,33 @@ import me.youhavetrouble.inviter.discord.GuildSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class GetDiscordInviteByGuildId implements EndpointHandler {
 
     private final Pattern pathPattern = Pattern.compile("^/invite/\\d{10,18}$");
+
+    private final String invitesDisabledTemplate, botNotInGuildTemplate;
+
+    public GetDiscordInviteByGuildId() {
+        String invitesDisabledTemplate = null;
+        try (InputStream resource = this.getClass().getResourceAsStream("/template/invites-paused.html")) {
+            invitesDisabledTemplate = new String(resource.readAllBytes());
+        } catch (IOException | NullPointerException e) {
+            Main.LOGGER.warn("Failed to load template for invites disabled page", e);
+        }
+        this.invitesDisabledTemplate = invitesDisabledTemplate;
+
+        String botNotInGuildTemplate = null;
+        try (InputStream resource = this.getClass().getResourceAsStream("/template/guild-not-supported.html")) {
+            botNotInGuildTemplate = new String(resource.readAllBytes());
+        } catch (IOException | NullPointerException e) {
+            Main.LOGGER.warn("Failed to load template for guild not supported page", e);
+        }
+        this.botNotInGuildTemplate = botNotInGuildTemplate;
+    }
 
     @NotNull
     @Override
@@ -39,17 +61,18 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
             return;
         }
 
-        DiscordInviteManager inviteManager = Main.getDiscordInviteMenager();
         GuildSettings settings = Main.getStorage().getGuildSettings(guildIdLong);
-        DiscordInvite invite = inviteManager.getInvite(guildIdLong);
 
-        if (invite == null) {
-            exchange.sendResponseHeaders(404, -1); // Not Found
+        if (!settings.invitesEnabled()) {
+            sendInvitesPausedTemplate(exchange);
             return;
         }
 
-        if (!settings.invitesEnabled()) {
-            exchange.sendResponseHeaders(401, -1); // Not Found
+        DiscordInviteManager inviteManager = Main.getDiscordInviteMenager();
+        DiscordInvite invite = inviteManager.getInvite(guildIdLong);
+
+        if (invite == null) {
+            sendBotNotInGuildTemplate(exchange);
             return;
         }
 
@@ -72,10 +95,62 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
                 exchange.sendResponseHeaders(307, -1);
             }
         }
-
-
-
     }
 
+
+    private void sendInvitesPausedTemplate(HttpExchange exchange) throws IOException {
+        String message = "Guild you were invited to currently has invites disabled. Try again later.";
+        switch (exchange.getRequestHeaders().getFirst("Accept")) {
+            case "text/plain" -> {
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+
+                exchange.sendResponseHeaders(401, message.getBytes(StandardCharsets.UTF_8).length);
+                exchange.getResponseBody().write(message.getBytes(StandardCharsets.UTF_8));
+            }
+            case "application/json" -> {
+                exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                String jsonResponse = "{\"error\": \"%s\"}".formatted(message);
+                exchange.sendResponseHeaders(401, jsonResponse.length());
+                exchange.getResponseBody().write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+            }
+            default -> {
+                if (invitesDisabledTemplate != null) {
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(401, invitesDisabledTemplate.getBytes(StandardCharsets.UTF_8).length);
+                    exchange.getResponseBody().write(invitesDisabledTemplate.getBytes(StandardCharsets.UTF_8));
+                    exchange.getResponseBody().close();
+                } else {
+                    exchange.sendResponseHeaders(401, -1);
+                }
+            }
+        }
+    }
+
+    private void sendBotNotInGuildTemplate(HttpExchange exchange) throws IOException {
+        String message = "Guild you were invited to is not supported by the bot. Try again later.";
+        switch (exchange.getRequestHeaders().getFirst("Accept")) {
+            case "text/plain" -> {
+                exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
+                exchange.sendResponseHeaders(404, message.getBytes(StandardCharsets.UTF_8).length);
+                exchange.getResponseBody().write(message.getBytes(StandardCharsets.UTF_8));
+            }
+            case "application/json" -> {
+                exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                String jsonResponse = "{\"error\": \"%s\"}".formatted(message);
+                exchange.sendResponseHeaders(404, jsonResponse.length());
+                exchange.getResponseBody().write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+            }
+            default -> {
+                if (botNotInGuildTemplate != null) {
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(404, botNotInGuildTemplate.getBytes(StandardCharsets.UTF_8).length);
+                    exchange.getResponseBody().write(botNotInGuildTemplate.getBytes(StandardCharsets.UTF_8));
+                    exchange.getResponseBody().close();
+                } else {
+                    exchange.sendResponseHeaders(404, -1);
+                }
+            }
+        }
+    }
 
 }

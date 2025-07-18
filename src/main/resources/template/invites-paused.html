@@ -94,32 +94,14 @@
 </head>
 <body>
 <main>
-    <div>
+    <form method="get">
         <h1>Inviter</h1>
-        <p>Creates permanent invite links that make and recreate invite links if they expire or get removed.</p>
-        <a
+        <p>Guild you were invited to currently has invites disabled. Try again later.</p>
+        <button
+                type="submit"
                 role="button"
-                href="https://discord.com/oauth2/authorize?client_id={{discord_app_id}}"
-                target="_blank"
-                rel="noopener noreferrer"
-        >Install the bot</a>
-    </div>
-    <div>
-        <h2>Usage</h2>
-        <ol>
-            <li>Install the bot using the button above.</li>
-            <li>
-                <a
-                   href="https://discord.com/developers/docs/activities/building-an-activity#step-0-enable-developer-mode"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                >
-                    Enable developer mode
-                </a> in your discord client and copy your guilds ID.
-            </li>
-            <li>Now you can use <span class="highlight">https://inviter.yht.one/invite/&lt;your_guild_id&gt;</span></li>
-        </ol>
-    </div>
+        >Try again</button>
+    </form>
 </main>
 </body>
 </html>
