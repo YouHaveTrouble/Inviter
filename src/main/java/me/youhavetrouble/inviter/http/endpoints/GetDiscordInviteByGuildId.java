@@ -104,23 +104,23 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
             case "text/plain" -> {
                 exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
 
-                exchange.sendResponseHeaders(401, message.getBytes(StandardCharsets.UTF_8).length);
+                exchange.sendResponseHeaders(423, message.getBytes(StandardCharsets.UTF_8).length);
                 exchange.getResponseBody().write(message.getBytes(StandardCharsets.UTF_8));
             }
             case "application/json" -> {
                 exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
                 String jsonResponse = "{\"error\": \"%s\"}".formatted(message);
-                exchange.sendResponseHeaders(401, jsonResponse.length());
+                exchange.sendResponseHeaders(423, jsonResponse.length());
                 exchange.getResponseBody().write(jsonResponse.getBytes(StandardCharsets.UTF_8));
             }
             default -> {
                 if (invitesDisabledTemplate != null) {
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                    exchange.sendResponseHeaders(401, invitesDisabledTemplate.getBytes(StandardCharsets.UTF_8).length);
+                    exchange.sendResponseHeaders(423, invitesDisabledTemplate.getBytes(StandardCharsets.UTF_8).length);
                     exchange.getResponseBody().write(invitesDisabledTemplate.getBytes(StandardCharsets.UTF_8));
                     exchange.getResponseBody().close();
                 } else {
-                    exchange.sendResponseHeaders(401, -1);
+                    exchange.sendResponseHeaders(423, -1);
                 }
             }
         }
