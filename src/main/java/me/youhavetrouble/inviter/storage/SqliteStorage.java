@@ -37,7 +37,7 @@ public class SqliteStorage implements Storage {
             connection.createStatement().execute("""
                 CREATE TABLE IF NOT EXISTS guild_settings (
                     guild_id LONG PRIMARY KEY,
-                    invites_enabled BOOLEAN NOT NULL DEFAULT FALSE
+                    invites_enabled BOOLEAN NOT NULL DEFAULT TRUE
                 );
                 """
             );
@@ -62,7 +62,7 @@ public class SqliteStorage implements Storage {
                 boolean invitesEnabled = resultSet.getBoolean("invites_enabled");
                 return new GuildSettings(guildId, invitesEnabled);
             }
-            return new GuildSettings(guildId,false);
+            return new GuildSettings(guildId,true);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to retrieve guild settings", e);
 
