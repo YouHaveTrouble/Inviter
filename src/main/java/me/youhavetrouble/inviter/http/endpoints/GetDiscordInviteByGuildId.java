@@ -14,7 +14,10 @@ import java.util.regex.Pattern;
 
 public class GetDiscordInviteByGuildId implements EndpointHandler {
 
-    private final Pattern pathPattern = Pattern.compile("^/invite/\\d{10,18}$");
+    /**
+     * Technically shortest dsicord snowflake is 7 characters and current longest is 19, so kinda-futureproofing it and going with 20.
+     */
+    private final Pattern pathPattern = Pattern.compile("^/invite/\\d{7,20}$");
 
     private final String invitesDisabledTemplate, botNotInGuildTemplate;
 
