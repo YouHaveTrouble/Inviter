@@ -24,6 +24,7 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
     public GetDiscordInviteByGuildId() {
         String invitesDisabledTemplate = null;
         try (InputStream resource = this.getClass().getResourceAsStream("/template/invites-paused.html")) {
+            assert resource != null;
             invitesDisabledTemplate = new String(resource.readAllBytes());
         } catch (IOException | NullPointerException e) {
             Main.LOGGER.warn("Failed to load template for invites disabled page", e);
@@ -32,6 +33,7 @@ public class GetDiscordInviteByGuildId implements EndpointHandler {
 
         String botNotInGuildTemplate = null;
         try (InputStream resource = this.getClass().getResourceAsStream("/template/guild-not-supported.html")) {
+            assert resource != null;
             botNotInGuildTemplate = new String(resource.readAllBytes());
         } catch (IOException | NullPointerException e) {
             Main.LOGGER.warn("Failed to load template for guild not supported page", e);
