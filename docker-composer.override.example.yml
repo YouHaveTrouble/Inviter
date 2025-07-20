@@ -1,0 +1,6 @@
+services:
+  inviter:
+    ports:
+      - "8080:8080"
+    environment:
+      DISCORD_TOKEN: "your_discord_token_here"
