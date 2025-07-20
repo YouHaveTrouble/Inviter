@@ -1,0 +1,13 @@
+services:
+  inviter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inviter
+    stdin_open: true
+    tty: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+    environment: []
