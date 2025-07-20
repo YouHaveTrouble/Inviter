@@ -20,6 +20,7 @@ public class MainEndpoint implements EndpointHandler {
         try (InputStream resource = this.getClass().getResourceAsStream("/template/index.html")) {
             rawTemplate = new String(resource.readAllBytes());
             rawTemplate = rawTemplate.replaceAll("\\{\\{discord_app_id}}", Main.getJda().getSelfUser().getApplicationId());
+            rawTemplate = rawTemplate.replaceAll("\\{\\{base_url}}", Main.baseUrl);
         } catch (IOException | NullPointerException e) {
             Main.LOGGER.warn("Failed to load template for main endpoint", e);
         }

@@ -7,3 +7,4 @@ services:
 #      - ./logs:/app/logs # uncomment to get access to logs more easily
     environment:
       DISCORD_TOKEN: "your_discord_token_here"
+      BASE_URL: "https://example.com" # replace with your actual base URL. THis will display on the template pages

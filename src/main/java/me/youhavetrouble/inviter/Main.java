@@ -22,6 +22,8 @@ public class Main {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("Inviter");
 
+    public static String baseUrl;
+
     private static JDA jda;
     private static DiscordInviteManager discordInviteManager;
     private static ApiServer apiServer;
@@ -30,6 +32,15 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
 
         String token = System.getenv("DISCORD_TOKEN");
+
+        String baseUrlRaw = System.getenv("BASE_URL");
+        if (baseUrlRaw == null || baseUrlRaw.isEmpty()) {
+            baseUrl = "https://example.com";
+            LOGGER.warn("BASE_URL environment variable is not set. Using default: {}", baseUrl);
+        } else {
+            if (baseUrlRaw.endsWith("/")) baseUrlRaw = baseUrlRaw.substring(0, baseUrlRaw.length() - 1);
+            baseUrl = baseUrlRaw;
+        }
 
         if (token == null || token.isEmpty()) {
             LOGGER.error("Discord token is not set. Please set the DISCORD_TOKEN environment variable.");
