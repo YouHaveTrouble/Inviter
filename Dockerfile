@@ -18,4 +18,4 @@ COPY --from=build /app/target/Inviter.jar Inviter.jar
 RUN chmod 755 Inviter.jar
 
 # Run the JAR file
-CMD ["java", "-jar", "Inviter.jar", "--hostname=0.0.0.0"]
+CMD ["java", "-jar", "Inviter.jar", "hostname=0.0.0.0"]
