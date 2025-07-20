@@ -2,5 +2,8 @@ services:
   inviter:
     ports:
       - "8080:8080"
+    volumes:
+#      - ./data:/app/data # uncomment to get access to database files more easily
+#      - ./logs:/app/logs # uncomment to get access to logs more easily
     environment:
       DISCORD_TOKEN: "your_discord_token_here"
