@@ -3,11 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: unless-stopped
     container_name: inviter
     stdin_open: true
     tty: true
-    ports:
-      - "8080:8080"
     volumes:
       - inviter:/app
 
